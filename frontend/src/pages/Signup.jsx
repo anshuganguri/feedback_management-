@@ -1,18 +1,17 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Signup() {
   const { register, handleSubmit, formState: { isSubmitting } } = useForm();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
 
-  const onSubmit = async ({ name, email, password }) => {
+  const onSubmit = async (data) => {
     try {
-      const res = await api.post('/auth/signup', { name, email, password });
-      login(res.data, res.data?.token);
+      await signup(data);
       navigate('/dashboard');
     } catch (e) {
       alert('Failed to sign up');

@@ -1,38 +1,23 @@
-import React from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 
-export default function DashboardStats() {
-  const data = [
-    { name: 'Mon', feedback: 5 },
-    { name: 'Tue', feedback: 8 },
-    { name: 'Wed', feedback: 6 },
-    { name: 'Thu', feedback: 12 },
-    { name: 'Fri', feedback: 9 },
-    { name: 'Sat', feedback: 4 },
-    { name: 'Sun', feedback: 7 },
+
+import React from "react";
+
+export default function DashboardStats({ stats }) {
+  const statCards = [
+    { label: "Total Feedback", value: stats.total, color: "bg-blue-100 text-blue-800" },
+    { label: "Avg Rating", value: stats.avgRating, color: "bg-yellow-100 text-yellow-800" },
+    { label: "Pending", value: stats.pending, color: "bg-red-100 text-red-800" },
+    { label: "Resolved", value: stats.resolved, color: "bg-green-100 text-green-800" },
   ];
-
   return (
-    <div className="bg-white rounded border p-4">
-      <h3 className="font-semibold mb-3">Weekly Feedback</h3>
-      <div className="h-48">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="colorFeedback" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="name"/>
-            <YAxis/>
-            <Tooltip/>
-            <Area type="monotone" dataKey="feedback" stroke="#3b82f6" fillOpacity={1} fill="url(#colorFeedback)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      {statCards.map(card => (
+        <div key={card.label} className={`rounded shadow p-4 text-center font-bold text-lg ${card.color}`}>
+          <div className="text-sm font-medium mb-2">{card.label}</div>
+          <div className="text-2xl">{card.value}</div>
+        </div>
+      ))}
     </div>
   );
 }
-
 
