@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FiSearch, FiFilter, FiEye, FiEdit3, FiTrash2, FiStar } from 'react-icons/fi';
-import { mockFeedback } from '../utils/mockData.js';
+import api from '../utils/api';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 export default function ViewFeedback() {
@@ -11,40 +12,24 @@ export default function ViewFeedback() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Filter and sort feedback
-  const filteredFeedback = useMemo(() => {
-    let filtered = mockFeedback.filter(feedback => {
-      const matchesSearch = feedback.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           feedback.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           feedback.user.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === 'all' || feedback.status === statusFilter;
-      const matchesType = typeFilter === 'all' || feedback.type === typeFilter;
-      
-      return matchesSearch && matchesStatus && matchesType;
-    });
+  const [results, setResults] = useState({ content: [], totalPages: 0, totalElements: 0 });
 
-    // Sort
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'date':
-          return new Date(b.date) - new Date(a.date);
-        case 'rating':
-          return b.rating - a.rating;
-        case 'title':
-          return a.title.localeCompare(b.title);
-        default:
-          return 0;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const page = currentPage - 1; // backend is 0-based
+        const data = await api.searchFeedback({ q: searchTerm, status: statusFilter, type: typeFilter, page, size: itemsPerPage, sortBy });
+        setResults({ content: data.content || [], totalPages: data.totalPages || 0, totalElements: data.totalElements || 0 });
+      } catch (e) {
+        setResults({ content: [], totalPages: 0, totalElements: 0 });
+        toast.error(e.message || 'Failed to load feedback');
       }
-    });
+    };
+    fetchData();
+  }, [searchTerm, statusFilter, typeFilter, sortBy, currentPage]);
 
-    return filtered;
-  }, [searchTerm, statusFilter, typeFilter, sortBy]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredFeedback.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedFeedback = filteredFeedback.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = results.totalPages;
+  const paginatedFeedback = results.content;
 
   const getStatusBadge = (status) => {
     const statusClasses = {
@@ -66,8 +51,17 @@ export default function ViewFeedback() {
     return typeClasses[type] || 'badge badge-gray';
   };
 
-  const handleStatusUpdate = (id, newStatus) => {
-    toast.success(`Feedback status updated to ${newStatus}`);
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      await api.updateFeedbackStatus(id, newStatus);
+      toast.success(`Feedback status updated to ${newStatus}`);
+      // refresh current page
+      const page = currentPage - 1;
+      const data = await api.searchFeedback({ q: searchTerm, status: statusFilter, type: typeFilter, page, size: itemsPerPage, sortBy });
+      setResults({ content: data.content || [], totalPages: data.totalPages || 0, totalElements: data.totalElements || 0 });
+    } catch (e) {
+      toast.error(e.message || 'Failed to update status');
+    }
   };
 
   const renderStars = (rating) => {
@@ -151,24 +145,24 @@ export default function ViewFeedback() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="card text-center">
-          <p className="text-2xl font-bold text-gray-900">{filteredFeedback.length}</p>
+          <p className="text-2xl font-bold text-gray-900">{results.totalElements}</p>
           <p className="text-sm text-gray-600">Total Results</p>
         </div>
         <div className="card text-center">
           <p className="text-2xl font-bold text-yellow-600">
-            {filteredFeedback.filter(f => f.status === 'pending').length}
+            {paginatedFeedback.filter(f => f.status === 'pending').length}
           </p>
           <p className="text-sm text-gray-600">Pending</p>
         </div>
         <div className="card text-center">
           <p className="text-2xl font-bold text-blue-600">
-            {filteredFeedback.filter(f => f.status === 'in-progress').length}
+            {paginatedFeedback.filter(f => f.status === 'in-progress').length}
           </p>
           <p className="text-sm text-gray-600">In Progress</p>
         </div>
         <div className="card text-center">
           <p className="text-2xl font-bold text-green-600">
-            {filteredFeedback.filter(f => f.status === 'resolved').length}
+            {paginatedFeedback.filter(f => f.status === 'resolved').length}
           </p>
           <p className="text-sm text-gray-600">Resolved</p>
         </div>

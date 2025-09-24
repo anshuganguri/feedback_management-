@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { FiStar, FiSend, FiUser, FiMail } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
+import api from '../utils/api';
 
 export default function SubmitFeedback() {
   const { dispatch } = useApp();
@@ -18,25 +19,14 @@ export default function SubmitFeedback() {
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const feedbackData = {
-        ...data,
-        rating,
-        id: Date.now(),
-        date: new Date().toISOString(),
-        status: 'pending'
-      };
-
-      // Add to context
-      dispatch({ type: 'ADD_FEEDBACK', payload: feedbackData });
-      
+      const payload = { ...data, rating, priority: data.priority };
+      const created = await api.createFeedback(payload);
+      dispatch({ type: 'ADD_FEEDBACK', payload: created });
       toast.success('Feedback submitted successfully!');
       reset();
       setRating(0);
     } catch (error) {
-      toast.error('Failed to submit feedback. Please try again.');
+      toast.error(error.message || 'Failed to submit feedback. Please try again.');
     }
   };
 

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useApp } from '../context/AppContext';
+import api from '../utils/api';
 
 export default function Login() {
   const { user, dispatch } = useApp();
@@ -25,27 +26,12 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock authentication
-      if (data.email === 'admin@example.com' && data.password === 'password123') {
-        dispatch({
-          type: 'LOGIN',
-          payload: {
-            id: 1,
-            name: 'Admin User',
-            email: data.email,
-            role: 'admin'
-          }
-        });
-        toast.success('Welcome back!');
-        navigate('/dashboard');
-      } else {
-        toast.error('Invalid credentials. Try admin@example.com / password123');
-      }
+      const user = await api.login(data.email, data.password);
+      dispatch({ type: 'LOGIN_SUCCESS', payload: user });
+      toast.success('Welcome back!');
+      navigate('/dashboard');
     } catch (error) {
-      toast.error('Login failed. Please try again.');
+      toast.error(error.message || 'Login failed. Please try again.');
     }
   };
 

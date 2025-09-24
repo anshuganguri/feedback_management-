@@ -48,9 +48,9 @@ function appReducer(state, action) {
     case 'ADD_FEEDBACK':
       const newFeedback = {
         ...action.payload,
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        status: 'Open',
+        id: action.payload.id ?? Date.now().toString(),
+        date: action.payload.date ?? new Date().toISOString(),
+        status: action.payload.status ?? 'pending',
       };
       const updatedFeedbacks = [...state.feedbacks, newFeedback];
       localStorage.setItem('feedbacks', JSON.stringify(updatedFeedbacks));

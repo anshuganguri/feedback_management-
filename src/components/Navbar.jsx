@@ -1,9 +1,10 @@
 import React from 'react';
 import { FiMenu, FiSun, FiMoon, FiBell, FiSearch } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 export default function Navbar({ onMenuClick }) {
-  const { theme, dispatch, user } = useApp();
+  const { theme, dispatch, user, isAuthenticated } = useApp();
 
   const toggleTheme = () => {
     dispatch({ type: 'TOGGLE_THEME' });
@@ -66,16 +67,29 @@ export default function Navbar({ onMenuClick }) {
             )}
           </button>
 
-          {/* User Profile */}
-          <div className="flex items-center gap-2 ml-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              {user?.name?.charAt(0) || 'U'}
+          {/* Auth Controls */}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2 ml-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                {user?.name?.charAt(0) || 'U'}
+              </div>
+              <div className="hidden md:block">
+                <div className="text-sm font-medium text-gray-900">{user?.name || 'User'}</div>
+                <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
+              </div>
+              <button
+                onClick={() => dispatch({ type: 'LOGOUT' })}
+                className="btn-secondary px-4 py-2"
+              >
+                Logout
+              </button>
             </div>
-            <div className="hidden md:block">
-              <div className="text-sm font-medium text-gray-900">{user?.name || 'User'}</div>
-              <div className="text-xs text-gray-500">{user?.email || 'user@example.com'}</div>
+          ) : (
+            <div className="flex items-center gap-2 ml-2">
+              <Link to="/login" className="btn-secondary px-4 py-2">Login</Link>
+              <Link to="/signup" className="btn-primary px-4 py-2">Sign up</Link>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

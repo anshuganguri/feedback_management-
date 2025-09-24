@@ -18,8 +18,8 @@ const Layout = () => {
       
       {/* Sidebar */}
       <Sidebar 
-        sidebarOpen={sidebarOpen} 
-        setSidebarOpen={setSidebarOpen} 
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)} 
       />
       
       {/* Main content */}

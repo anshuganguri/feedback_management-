@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { FiEye, FiEyeOff, FiMail, FiLock, FiUser, FiUserPlus } from 'react-icons/fi';
 import { FaGoogle, FaLinkedin } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
+import api from '../utils/api';
 import { validateEmail, validatePassword } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
@@ -25,25 +26,13 @@ export default function Signup() {
   const onSubmit = async (data) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create new user
-      const user = {
-        id: Date.now().toString(),
-        name: data.name,
-        email: data.email,
-        role: 'user',
-        createdAt: new Date().toISOString(),
-      };
-      
+      const user = await api.signup({ name: data.name, email: data.email, password: data.password });
       dispatch({ type: 'LOGIN_SUCCESS', payload: user });
       toast.success('Account created successfully! Welcome to FeedbackHub!');
       navigate('/dashboard');
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Signup failed. Please try again.' });
-      toast.error('Signup failed. Please try again.');
+      dispatch({ type: 'SET_ERROR', payload: error.message || 'Signup failed. Please try again.' });
+      toast.error(error.message || 'Signup failed. Please try again.');
     }
   };
 

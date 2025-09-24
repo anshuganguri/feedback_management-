@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AppProvider, useApp } from './context/AppContext';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import Layout from './components/Layout.jsx';
 
 // Pages
 import Login from './pages/Login.jsx';
@@ -21,82 +22,49 @@ function AppRoutes() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Routes>
           {/* Public Routes */}
-          <Route 
-            path="/login" 
-            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
           />
-          <Route 
-            path="/signup" 
-            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />} 
+          <Route
+            path="/signup"
+            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Signup />}
           />
-          
-          {/* Protected Routes */}
-          <Route 
-            path="/dashboard" 
+
+          {/* Protected Layout with nested routes (shows Navbar/Sidebar) */}
+          <Route
+            path="/"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Layout />
               </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/submit-feedback" 
-            element={
-              <ProtectedRoute>
-                <SubmitFeedback />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/view-feedback" 
-            element={
-              <ProtectedRoute>
-                <ViewFeedback />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/analytics" 
-            element={
-              <ProtectedRoute>
-                <Analytics />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/settings" 
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Default Route */}
-          <Route 
-            path="/" 
-            element={
-              <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
-            } 
-          />
-          
+            }
+          >
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="submit-feedback" element={<SubmitFeedback />} />
+            <Route path="view-feedback" element={<ViewFeedback />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+
           {/* 404 Route */}
-          <Route 
-            path="*" 
+          <Route
+            path="*"
             element={
               <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                   <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">404</h1>
                   <p className="text-gray-600 dark:text-gray-400 mb-6">Page not found</p>
-                  <a 
-                    href="/" 
+                  <a
+                    href="/"
                     className="btn-primary"
                   >
                     Go Home
                   </a>
                 </div>
               </div>
-            } 
+            }
           />
         </Routes>
         
